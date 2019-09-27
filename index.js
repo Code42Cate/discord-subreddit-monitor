@@ -1,22 +1,23 @@
 const rp = require('request-promise-native');
+const fs = require('fs-extra');
 
-const subredditURL = 'https://www.reddit.com/r/RobinHoodPennyStocks/new/.json';
-const webhook = '';
+const config = fs.readJSONSync('config.json');
+
 let lastPost = '';
 
 const sendWebhook = (title, permalink, time) => {
   console.log(time);
   const payload = {
     headers: { 'Content-Type': 'application/json' },
-    url: webhook,
+    url: config.webhook,
     method: 'POST',
     json: {
       embeds: [{
         url: permalink,
         title,
-        color: 1490505,
+        color: 0x16BE49,
         footer: {
-          text: `r/robinhoodpennystocks Monitor @ ${time}`,
+          text: `${config.footerPrefix} @ ${time}`,
         },
       }],
     },
@@ -25,7 +26,7 @@ const sendWebhook = (title, permalink, time) => {
 };
 
 const scrape = async () => {
-  rp(subredditURL).then((response) => {
+  rp(config.subredditURL).then((response) => {
     const json = JSON.parse(response);
     const latestPost = json.data.children[0].data.url;
     if (lastPost !== latestPost) {
